@@ -1,3 +1,5 @@
+require 'warden'
+
 # Insert Warden::Manager as Rack::Middleware
 Rails.configuration.middleware.insert_before Rack::Head, Warden::Manager do |manager|
   manager.default_strategies ROCCI_SERVER_CONFIG.common.authn_strategies.map { |strategy| strategy.to_sym }
