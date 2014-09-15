@@ -1,3 +1,6 @@
+require 'hashie'
+require 'ice_nine'
+
 # Initialize a Mash
 ROCCI_SERVER_CONFIG = Hashie::Mash.new
 

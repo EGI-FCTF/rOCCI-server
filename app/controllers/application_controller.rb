@@ -1,3 +1,5 @@
+require 'rails-api'
+
 # Base class for all rOCCI-server's controllers. Implements
 # parsing and authentication callbacks, exposes user information,
 # declares supported media formats and handles raised errors.

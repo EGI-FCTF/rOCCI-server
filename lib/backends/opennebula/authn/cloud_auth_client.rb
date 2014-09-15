@@ -14,6 +14,7 @@
 # limitations under the License.                                             #
 #--------------------------------------------------------------------------- #
 
+require 'opennebula'
 require 'thread'
 
 module Backends::Opennebula::Authn
