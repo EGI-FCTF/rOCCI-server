@@ -1,2 +1,5 @@
 model_extensions_dir: <%= File.join(Rails.application.config.rocci_server_etc_dir, 'backends', 'azure', 'model') %>
 fixtures_dir: <%= File.join(Rails.application.config.rocci_server_etc_dir, 'backends', 'azure', 'fixtures') %>
+management_certificate: '/dev/zero' # path to *.pem or *.pfx file
+subscription_id: 'dummy_subscription_id' # your subscription id
+management_endpoint: 'http://management.localhost' # Azure endpoint (zone)

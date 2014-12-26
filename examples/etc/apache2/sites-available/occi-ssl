@@ -107,4 +107,9 @@
     SetEnv ROCCI_SERVER_EC2_NETWORK_DESTROY_ALLOWED    no
     SetEnv ROCCI_SERVER_EC2_NETWORK_DESTROY_VPN_GWS    no
     SetEnv ROCCI_SERVER_EC2_VO_AWS_MAPFILE             ""
+
+    # Azure backend
+    SetEnv ROCCI_SERVER_AZURE_MANAGEMENT_CERT      ""
+    SetEnv ROCCI_SERVER_AZURE_SUBSCRIPTION_ID      "MyAzureSubscriptionID"
+    SetEnv ROCCI_SERVER_AZURE_MANAGEMENT_ENDPOINT  "https://management.core.windows.net"
 </VirtualHost>
