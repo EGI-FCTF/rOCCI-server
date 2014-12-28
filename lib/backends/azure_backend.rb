@@ -30,6 +30,7 @@ module Backends
     end
 
     def init_client_instances
+      @logger.debug "[Backends] [AzureBackend] Initializing Azure service clients"
       @base_management_service ||= ::Azure::BaseManagementService.new
       @virtual_machine_service ||= ::Azure::VirtualMachineManagementService.new
       @virtual_machine_image_service ||= ::Azure::VirtualMachineImageManagementService.new
