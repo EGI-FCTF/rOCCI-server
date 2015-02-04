@@ -16,32 +16,36 @@ module Backends
         config.subscription_id        = @options.subscription_id
         config.management_endpoint    = @options.management_endpoint || "https://management.core.windows.net"
       end
-      init_client_instances
+      init_client_instances!
 
       @options.backend_scheme ||= "http://occi.#{@server_properties.hostname || 'localhost'}"
 
       path = @options.fixtures_dir || ''
-      read_fixtures(path)
+      read_resource_tpl_fixtures(path)
     end
 
-    def read_fixtures(base_path)
-      @logger.debug "[Backends] [AzureBackend] Reading fixtures from #{base_path.to_s.inspect}"
-      # TODO: impl reading fixtures
-    end
-
-    def init_client_instances
+    def init_client_instances!
       @logger.debug "[Backends] [AzureBackend] Initializing Azure service clients"
       @base_management_service ||= ::Azure::BaseManagementService.new
       @virtual_machine_service ||= ::Azure::VirtualMachineManagementService.new
       @virtual_machine_image_service ||= ::Azure::VirtualMachineImageManagementService.new
     end
 
+    def read_resource_tpl_fixtures(base_path)
+      path = File.join(base_path, 'resource_tpl', '*.json')
+      @resource_tpl = Occi::Core::Mixins.new
+
+      Dir.glob(path) do |json_file|
+        @resource_tpl.merge(read_from_json(json_file).mixins) if File.readable?(json_file)
+      end
+    end
+
     # load helpers for JSON -> Collection conversion
     include Backends::Helpers::JsonCollectionHelper
 
     # hide internal stuff
-    private :read_fixtures
-    private :init_client_instances
+    private :read_resource_tpl_fixtures
+    private :init_client_instances!
 
     # load API implementation
     include Backends::Azure::Compute
