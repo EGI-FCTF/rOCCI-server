@@ -33,14 +33,17 @@ module Backends
       # @param term [String] OCCI term of the requested os_tpl mixin instance
       # @return [Occi::Core::Mixin, nil] a mixin instance or `nil`
       def os_tpl_get(term)
-        azure_image_hash = os_tpl_list_term_to_image_hash(term)
-        return unless azure_image_hash
-
-        azure_image = os_tpl_list_image_hash_to_image(azure_image_hash)
-        azure_image ? os_tpl_list_mixin_from_image(azure_image) : nil
+        azure_image = os_tpl_list_term_to_image(term)
+        os_tpl_list_mixin_from_image(azure_image)
       end
 
       private
+
+      #
+      #
+      def os_tpl_list_term_to_image_name(mixin_term)
+        os_tpl_list_term_to_image(mixin_term).name
+      end
 
       #
       #
@@ -68,17 +71,25 @@ module Backends
 
       #
       #
-      def os_tpl_list_term_to_image_hash(mixin_term)
-        matched = AZURE_IMAGE_TERM.match(mixin_term)
-        matched ? matched[:image_hash] : nil
+      def os_tpl_list_term_to_image(mixin_term)
+        azure_image_hash = os_tpl_list_term_to_image_hash(mixin_term)
+        fail Backends::Errors::ResourceNotValidError,
+            "Invalid os_tpl mixin format! #{mixin_term.inspect}" unless azure_image_hash
+
+        azure_image = @virtual_machine_image_service.list_virtual_machine_images.select do |azure_image|
+          ::Digest::SHA1.hexdigest(azure_image.name) == azure_image_hash
+        end
+        fail Backends::Errors::ResourceNotFoundError,
+            "There is no such os_tpl mixin! #{mixin_term.inspect}" unless azure_image.first
+
+        azure_image.first
       end
 
       #
       #
-      def os_tpl_list_image_hash_to_image(azure_image_hash)
-        @virtual_machine_image_service.list_virtual_machine_images.select { |azure_image|
-          ::Digest::SHA1.hexdigest(azure_image.name) == azure_image_hash
-        }.first
+      def os_tpl_list_term_to_image_hash(mixin_term)
+        matched = AZURE_IMAGE_TERM.match(mixin_term)
+        matched ? matched[:image_hash] : nil
       end
 
     end

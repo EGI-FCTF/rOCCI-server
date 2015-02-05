@@ -42,13 +42,40 @@ module Backends
       # @param term [String] OCCI term of the requested resource_tpl mixin instance
       # @return [Occi::Core::Mixin, nil] a mixin instance or `nil`
       def resource_tpl_get(term)
-        azure_size_hash = resource_tpl_list_term_to_size_hash(term)
-        return unless azure_size_hash
+        found = resource_tpl_list_term_to_original_mixin(term)
 
-        @resource_tpl.to_a.select { |m| ::Digest::SHA1.hexdigest(m.term) == azure_size_hash }.first
+        Occi::Core::Mixin.new(
+          found.scheme,
+          resource_tpl_list_size_name_to_term(found.term),
+          found.title,
+          found.attributes,
+          found.depends,
+          found.actions,
+          found.location,
+          found.applies
+        )
       end
 
       private
+
+      #
+      #
+      def resource_tpl_list_term_to_size_name(mixin_term)
+        resource_tpl_list_term_to_original_mixin(mixin_term).term
+      end
+
+      #
+      #
+      def resource_tpl_list_term_to_original_mixin(mixin_term)
+        azure_size_hash = resource_tpl_list_term_to_size_hash(mixin_term)
+        fail Backends::Errors::ResourceNotValidError,
+            "Invalid resource_tpl mixin format! #{mixin_term.inspect}" unless azure_size_hash
+
+        found = @resource_tpl.to_a.select { |m| ::Digest::SHA1.hexdigest(m.term) == azure_size_hash }.first
+        fail Backends::Errors::ResourceNotFoundError,
+            "There is no such resource_tpl mixin! #{mixin_term.inspect}" unless found
+        found
+      end
 
       #
       #
