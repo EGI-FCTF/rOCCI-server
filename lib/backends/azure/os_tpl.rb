@@ -2,7 +2,7 @@ module Backends
   module Azure
     module OsTpl
 
-      AZURE_IMAGE_TERM = /^uuid_(?<image_name>.+)$/
+      AZURE_IMAGE_TERM = /^uuid_(?<image_name>.+)__(?<image_hash>[[:alnum:]]{40})$/
 
       # Gets backend-specific `os_tpl` mixins which should be merged
       # into Occi::Model of the server.
@@ -33,12 +33,11 @@ module Backends
       # @param term [String] OCCI term of the requested os_tpl mixin instance
       # @return [Occi::Core::Mixin, nil] a mixin instance or `nil`
       def os_tpl_get(term)
-        azure_image_name = os_tpl_list_term_to_image_name(term)
-        return unless azure_image_name
+        azure_image_hash = os_tpl_list_term_to_image_hash(term)
+        return unless azure_image_hash
 
-        @virtual_machine_image_service.list_virtual_machine_images.select { |azure_image|
-          azure_image.name == azure_image_name
-        }.first
+        azure_image = os_tpl_list_image_hash_to_image(azure_image_hash)
+        azure_image ? os_tpl_list_mixin_from_image(azure_image) : nil
       end
 
       private
@@ -59,14 +58,27 @@ module Backends
       #
       #
       def os_tpl_list_image_to_term(azure_image)
-        "uuid_#{azure_image.name}"
+        azure_image_name = azure_image.name.downcase
+        azure_image_name.gsub!(/[^a-z0-9\-]/, '_')
+        azure_image_name.gsub!(/_+/, '_')
+        azure_image_name.gsub!(/^_|_$/, '')
+
+        "uuid_#{azure_image_name}__#{::Digest::SHA1.hexdigest(azure_image.name)}"
       end
 
       #
       #
-      def os_tpl_list_term_to_image_name(mixin_term)
+      def os_tpl_list_term_to_image_hash(mixin_term)
         matched = AZURE_IMAGE_TERM.match(mixin_term)
-        matched ? matched[:image_name] : nil
+        matched ? matched[:image_hash] : nil
+      end
+
+      #
+      #
+      def os_tpl_list_image_hash_to_image(azure_image_hash)
+        @virtual_machine_image_service.list_virtual_machine_images.select { |azure_image|
+          ::Digest::SHA1.hexdigest(azure_image.name) == azure_image_hash
+        }.first
       end
 
     end
