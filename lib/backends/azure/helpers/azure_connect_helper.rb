@@ -41,9 +41,12 @@ module Backends
           when 503, 504
             # service is not available, probably Azure's fault
             fail Backends::Errors::ServiceUnavailableError, message
-          when 401, 403
+          when 401
             # something is wrong with our credentials
             fail Backends::Errors::AuthenticationError, message
+          when 403
+            # not allowed to do that
+            fail Backends::Errors::UserNotAuthorizedError, message
           when 405, 406
             # action wasn't allowed in this state or context
             fail Backends::Errors::ResourceStateError, message
