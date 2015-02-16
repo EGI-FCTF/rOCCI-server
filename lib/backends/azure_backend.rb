@@ -24,12 +24,13 @@ module Backends
     end
 
     def init_client_instances!
-      return false if @base_management_service && @virtual_machine_service && @virtual_machine_image_service
+      return false if @virtual_machine_service && @virtual_machine_image_service && @virtual_machine_disk_service && @virtual_network_service
 
       @logger.debug "[Backends] [AzureBackend] Initializing Azure service clients"
-      @base_management_service ||= ::Azure::BaseManagementService.new
       @virtual_machine_service ||= ::Azure::VirtualMachineManagementService.new
       @virtual_machine_image_service ||= ::Azure::VirtualMachineImageManagementService.new
+      @virtual_machine_disk_service ||= ::Azure::VirtualMachineImageManagement::VirtualMachineDiskManagementService.new
+      @virtual_network_service ||= ::Azure::VirtualNetworkManagementService.new
 
       true
     end

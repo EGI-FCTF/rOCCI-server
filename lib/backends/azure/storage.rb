@@ -14,8 +14,9 @@ module Backends
       # @param mixins [Occi::Core::Mixins] a filter containing mixins
       # @return [Array<String>] IDs for all available storage instances
       def storage_list_ids(mixins = nil)
-        # TODO: impl
-        fail Backends::Errors::MethodNotImplementedError, 'Feature currently not implemented!'
+        Backends::Azure::Helpers::AzureConnectHelper.rescue_azure_service(@logger) do
+          @virtual_machine_disk_service.list_virtual_machine_disks.collect { |disk| disk.name }
+        end
       end
 
       # Gets all storage instances, instances must be filtered

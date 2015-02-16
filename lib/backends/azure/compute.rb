@@ -14,8 +14,9 @@ module Backends
       # @param mixins [Occi::Core::Mixins] a filter containing mixins
       # @return [Array<String>] IDs for all available compute instances
       def compute_list_ids(mixins = nil)
-        # TODO: impl
-        fail Backends::Errors::MethodNotImplementedError, 'Feature currently not implemented!'
+        Backends::Azure::Helpers::AzureConnectHelper.rescue_azure_service(@logger) do
+          @virtual_machine_service.list_virtual_machines.collect { |vm| vm.vm_name }
+        end
       end
 
       # Gets all compute instances, instances must be filtered

@@ -14,8 +14,9 @@ module Backends
       # @param mixins [Occi::Core::Mixins] a filter containing mixins
       # @return [Array<String>] IDs for all available network instances
       def network_list_ids(mixins = nil)
-        # TODO: impl
-        fail Backends::Errors::MethodNotImplementedError, 'Feature currently not implemented!'
+        Backends::Azure::Helpers::AzureConnectHelper.rescue_azure_service(@logger) do
+          @virtual_network_service.list_virtual_networks.collect { |vnet| vnet.id }
+        end
       end
 
       # Gets all network instances, instances must be filtered
