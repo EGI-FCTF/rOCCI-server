@@ -68,8 +68,49 @@ module Backends
       # @param compute [Occi::Infrastructure::Compute] compute instance containing necessary attributes
       # @return [String] final identifier of the new compute instance
       def compute_create(compute)
-        # TODO: impl
-        fail Backends::Errors::MethodNotImplementedError, 'Feature currently not implemented!'
+        generated_vm_name = ::Digest::SHA1.hexdigest(compute.id)
+
+        # look up image name based on included os_tpl mixin
+        os_tpl_mixins = compute.mixins.get_related_to(Occi::Infrastructure::OsTpl.mixin.type_identifier)
+        if os_tpl_mixins.empty?
+          fail Backends::Errors::ResourceNotValidError,
+               "Given instance does not contain an os_tpl " \
+               "mixin necessary to create a virtual machine!"
+        end
+        image_name = os_tpl_list_term_to_image_name(os_tpl_mixins.first.term)
+
+        # look up size name based on included resource_tpl or default to first available
+        resource_tpl_mixins = compute.mixins.get_related_to(Occi::Infrastructure::ResourceTpl.mixin.type_identifier)
+        resource_tpl_mixin = resource_tpl_mixins.empty? ? resource_tpl_list.first : resource_tpl_mixins.first
+        vm_size = resource_tpl_list_term_to_size_name(resource_tpl_mixin.term)
+
+        params = {
+          :vm_name  => generated_vm_name,
+          :vm_user  => nil,       # from config, required
+          :image    => image_name,
+          :password => nil,
+          :location => nil,       # from config, required
+        }
+        options = {
+          :storage_account_name => nil,
+          :winrm_transport      => ['https','http'],
+          :cloud_service_name   => generated_vm_name,
+          :deployment_name      => generated_vm_name,
+          :tcp_endpoints        => nil,             # sting with ports, iptable-like range
+          :ssh_private_key_file => nil,             # path to a temp file, required
+          :ssh_certificate_file => nil,             # path to a temp file, required
+          :ssh_port             => 22,
+          :vm_size              => vm_size,
+          :virtual_network_name => nil,             # from inline networkinterface
+          :subnet_name          => nil,             # always the first subnet
+        }
+
+        Backends::Azure::Helpers::AzureConnectHelper.rescue_azure_service(@logger) do
+          rc = @virtual_machine_service.create_virtual_machine(params, options)
+          fail Backends::Errors::ResourceCreationError, rc.to_s unless rc.kind_of?(::Azure::VirtualMachineManagement::VirtualMachine)
+        end
+
+        generated_vm_name
       end
 
       # Deletes all compute instances, instances to be deleted must be filtered

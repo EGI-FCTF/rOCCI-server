@@ -22,6 +22,10 @@ module Backends
           rescue ::Azure::Core::Http::HTTPError => e
             handle_service_error(e, logger)
           rescue => e
+            # re-raise our errors
+            fail e if e.class.name.start_with?('Backends::Errors::')
+
+            # convert unknown errors
             logger.error "[Backends] [AzureBackend] Generic Error: #{e.message}"
             fail Backends::Errors::ResourceActionError, e.message
           end
@@ -52,7 +56,7 @@ module Backends
             fail Backends::Errors::ResourceStateError, message
           when 400
             # something was wrong with our request
-            fail Backends::Errors::ResourceNotValidError, message
+            fail Backends::Errors::ResourceCreationError, message
           when 404
             # it's not there anymore
             fail Backends::Errors::ResourceNotFoundError, message

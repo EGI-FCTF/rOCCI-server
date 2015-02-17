@@ -15,8 +15,10 @@ module Backends
       def os_tpl_list
         mixins = Occi::Core::Mixins.new
 
-        @virtual_machine_image_service.list_virtual_machine_images.each do |azure_image|
-          mixins << os_tpl_list_mixin_from_image(azure_image) if azure_image
+        Backends::Azure::Helpers::AzureConnectHelper.rescue_azure_service(@logger) do
+          @virtual_machine_image_service.list_virtual_machine_images.each do |azure_image|
+            mixins << os_tpl_list_mixin_from_image(azure_image) if azure_image
+          end
         end
 
         mixins
@@ -76,9 +78,12 @@ module Backends
         fail Backends::Errors::ResourceNotValidError,
             "Invalid os_tpl mixin format! #{mixin_term.inspect}" unless azure_image_hash
 
-        azure_image = @virtual_machine_image_service.list_virtual_machine_images.select do |azure_image|
-          ::Digest::SHA1.hexdigest(azure_image.name) == azure_image_hash
+        azure_image = Backends::Azure::Helpers::AzureConnectHelper.rescue_azure_service(@logger) do
+          @virtual_machine_image_service.list_virtual_machine_images.select do |azure_image|
+            ::Digest::SHA1.hexdigest(azure_image.name) == azure_image_hash
+          end
         end
+
         fail Backends::Errors::ResourceNotFoundError,
             "There is no such os_tpl mixin! #{mixin_term.inspect}" unless azure_image.first
 
