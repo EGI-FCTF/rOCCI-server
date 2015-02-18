@@ -3,3 +3,6 @@ fixtures_dir: <%= File.join(Rails.application.config.rocci_server_etc_dir, 'back
 management_certificate: <%= ENV['ROCCI_SERVER_AZURE_MANAGEMENT_CERT'] %> # path to *.pem or *.pfx file
 subscription_id: <%= ENV['ROCCI_SERVER_AZURE_SUBSCRIPTION_ID'] %> # your subscription id
 management_endpoint: <%= ENV['ROCCI_SERVER_AZURE_MANAGEMENT_ENDPOINT'] || 'https://management.core.windows.net' %> # Azure endpoint (zone)
+location: West Europe
+tcp_endpoints: [22,5985,5986]
+ssh_port: 22

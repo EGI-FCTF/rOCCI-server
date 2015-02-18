@@ -84,25 +84,32 @@ module Backends
         resource_tpl_mixin = resource_tpl_mixins.empty? ? resource_tpl_list.first : resource_tpl_mixins.first
         vm_size = resource_tpl_list_term_to_size_name(resource_tpl_mixin.term)
 
+        # pre-process options from global configuration
+        default_tcp_endpoints = if @options.tcp_endpoints.kind_of? String
+                                  @options.tcp_endpoints.split(' ')
+                                else
+                                  @options.tcp_endpoints
+                                end
+
         params = {
           :vm_name  => generated_vm_name,
-          :vm_user  => nil,       # from config, required
+          :vm_user  => "rocci_#{SecureRandom.hex(12)}",
           :image    => image_name,
-          :password => nil,
-          :location => nil,       # from config, required
+          :password => SecureRandom.hex(32),
+          :location => @options.location,
         }
         options = {
           :storage_account_name => nil,
-          :winrm_transport      => ['https','http'],
+          :winrm_transport      => ['http'],
           :cloud_service_name   => generated_vm_name,
           :deployment_name      => generated_vm_name,
-          :tcp_endpoints        => nil,             # sting with ports, iptable-like range
-          :ssh_private_key_file => nil,             # path to a temp file, required
-          :ssh_certificate_file => nil,             # path to a temp file, required
-          :ssh_port             => 22,
+          :tcp_endpoints        => default_tcp_endpoints,
+          :private_key_file     => nil, # TODO: how to pass ssh pub?
+          :certificate_file     => nil, # TODO: how to pass ssh pub?
+          :ssh_port             => @options.ssh_port.to_i,
           :vm_size              => vm_size,
-          :virtual_network_name => nil,             # from inline networkinterface
-          :subnet_name          => nil,             # always the first subnet
+          :virtual_network_name => nil, # TODO: after network stuff
+          :subnet_name          => nil, # TODO: after network stuff
         }
 
         Backends::Azure::Helpers::AzureConnectHelper.rescue_azure_service(@logger) do
