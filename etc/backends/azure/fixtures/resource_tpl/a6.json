@@ -1,0 +1,44 @@
+{
+  "mixins":[
+    {
+      "term":"A6",
+      "scheme":"http://schemas.azure.microsoft.com/occi/infrastructure/resource_tpl#",
+      "title":"A6 - 4 core and 28 GB RAM",
+      "location":"/mixin/resource_tpl/A6/",
+      "depends":[
+        "http://schemas.ogf.org/occi/infrastructure#resource_tpl"
+      ],
+      "applies":[
+        "http://schemas.ogf.org/occi/infrastructure#compute"
+      ],
+      "attributes":{
+        "occi":{
+          "compute":{
+            "architecture":{
+              "Mutable":true,
+              "Required":false,
+              "Type":"string",
+              "Pattern":"x86|x64",
+              "Default":"x64"
+            },
+            "cores":{
+              "Mutable":false,
+              "Type":"number",
+              "Default":4
+            },
+            "speed":{
+              "Mutable":false,
+              "Type":"number",
+              "Default":1
+            },
+            "memory":{
+              "Mutable":false,
+              "Type":"number",
+              "Default":28
+            }
+          }
+        }
+      }
+    }
+  ]
+}

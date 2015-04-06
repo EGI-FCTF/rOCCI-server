@@ -1,0 +1,3 @@
+# Deps for the Azure backend
+gem 'azure', '~> 0.6.4'
+gem 'mime-types', '~> 1.25.1'

@@ -1,0 +1,44 @@
+{
+  "mixins":[
+    {
+      "term":"Medium",
+      "scheme":"http://schemas.azure.microsoft.com/occi/infrastructure/resource_tpl#",
+      "title":"Medium - 2 core and 3.5 GB RAM",
+      "location":"/mixin/resource_tpl/Medium/",
+      "depends":[
+        "http://schemas.ogf.org/occi/infrastructure#resource_tpl"
+      ],
+      "applies":[
+        "http://schemas.ogf.org/occi/infrastructure#compute"
+      ],
+      "attributes":{
+        "occi":{
+          "compute":{
+            "architecture":{
+              "Mutable":true,
+              "Required":false,
+              "Type":"string",
+              "Pattern":"x86|x64",
+              "Default":"x64"
+            },
+            "cores":{
+              "Mutable":false,
+              "Type":"number",
+              "Default":2
+            },
+            "speed":{
+              "Mutable":false,
+              "Type":"number",
+              "Default":1
+            },
+            "memory":{
+              "Mutable":false,
+              "Type":"number",
+              "Default":3.5
+            }
+          }
+        }
+      }
+    }
+  ]
+}
